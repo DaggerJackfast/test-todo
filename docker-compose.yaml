@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  backend:
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: backend
+    image: ${IMAGE}
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - postgres_db
+    env_file:
+      - .env.production # TODO: change to env
+    ports:
+      - "5000:5000"
+
+  postgres_db:
+    restart: always
+    image: postgres:14.1-alpine
+    container_name: postgres_db
+    env_file:
+      - .env.database # TODO: change to env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
