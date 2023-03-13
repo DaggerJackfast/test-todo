@@ -27,9 +27,23 @@ lerna-debug.log*
 .settings/
 *.sublime-workspace
 
+# IDE - fleet
+.fleet
+
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Trashes
+.Trashes
+
+# Tmuxinator
+.tmuxinator.yml
+
+# environment
+.env
+.env.*
+!.env.example
