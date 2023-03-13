@@ -1,4 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Query } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { infinityPagination, IPaginationResult } from '../lib/pagination';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskQueryDto } from './dto/task-query.dto';
@@ -7,6 +8,7 @@ import { Task } from './entities/task.entity';
 import { TaskService } from './task.service';
 
 @Controller('tasks')
+@ApiTags('Tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
@@ -21,6 +23,7 @@ export class TaskController {
   public async find(@Query() query: TaskQueryDto): Promise<IPaginationResult<Task>> {
     const { page, limit, title, status } = query;
     // TODO: change title with ilike
+    // TODO: add order by field to query
     return infinityPagination(await this.taskService.findManyWithPagination({ title, status }, { page, limit }), { page, limit });
   }
 
