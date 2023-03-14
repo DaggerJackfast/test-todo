@@ -1,10 +1,14 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModuleAsyncOptions, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { DataSource, DataSourceOptions } from 'typeorm';
 import { makeDir } from '../lib/utils';
 
 const getSSLMode = (databaseSsl: boolean): object | boolean => {
   return databaseSsl ? { rejectUnauthorized: false } : false;
+};
+
+const getIsDevMode = (mode: string): boolean => {
+  return mode === 'development';
 };
 
 export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
@@ -15,6 +19,7 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
     await makeDir(migrationsDir);
     const databaseSsl = configService.get('DATABASE_SSL') === 'true';
     const sslMode = getSSLMode(databaseSsl);
+    const isDevMode = getIsDevMode(configService.get('NODE_ENV'));
     return {
       type: 'postgres',
       host: configService.get('DATABASE_HOST'),
@@ -26,9 +31,12 @@ export const typeOrmAsyncConfig: TypeOrmModuleAsyncOptions = {
       entities: [`${__dirname}/../**/*.entity{.ts,.js}`],
       migrations: [`${migrationsDir}/*{.ts,.js}`],
       synchronize: false,
-      logging: true, // TODO: disable logging for production
+      logging: isDevMode,
       ssl: sslMode,
     };
+  },
+  dataSourceFactory: async (options: DataSourceOptions) => {
+    return new DataSource(options).initialize();
   },
 };
 
@@ -45,7 +53,7 @@ export const getDataSource = (): DataSource => {
     migrationsTableName: 'migrations',
     synchronize: false,
     dropSchema: false,
-    logging: true,
+    logging: getIsDevMode(process.env.NODE_ENV),
     ssl: getSSLMode(process.env.DATABASE_SSL === 'true'),
   });
 };
