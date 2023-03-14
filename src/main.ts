@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import validationOptions from './lib/validation-options';
 
@@ -11,6 +12,7 @@ const bootstrap = async (): Promise<void> => {
   if (API_PATH) {
     app.setGlobalPrefix(API_PATH);
   }
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   app.useGlobalPipes(new ValidationPipe(validationOptions));
   const options = new DocumentBuilder()
     .setTitle('TODO API')

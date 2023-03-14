@@ -19,14 +19,29 @@ export class PaginationQueryDto {
 }
 
 export class TaskQueryDto extends PartialType(PaginationQueryDto) {
-  @ApiProperty({ example: 'Test Task', required: false, type: String })
+  @ApiProperty({ required: false, type: String })
   @IsOptional()
   @IsString()
   title: string;
 
-  @ApiProperty({ example: 'in_working', required: false, type: String })
+  @ApiProperty({ enum: TaskStatus, required: false, type: String })
   @IsOptional()
   @IsString()
   @IsEnum(TaskStatus)
   status: string;
+
+  @ApiProperty({ required: false, type: String, description: 'Search by part of title' })
+  @IsOptional()
+  @IsString()
+  search: string;
+
+  @ApiProperty({
+    example: '-createdAt',
+    required: false,
+    type: String,
+    description: 'For order DESC should add "-" before fieldName, Example -createdAt',
+  })
+  @IsOptional()
+  @IsString()
+  orderBy: string;
 }

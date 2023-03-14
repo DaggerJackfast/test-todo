@@ -1,18 +1,38 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Query } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpCode,
+  HttpStatus,
+  Query,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthUser } from '../auth/auth.decorator';
 import { infinityPagination, IPaginationResult } from '../lib/pagination';
+import { User } from '../user/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskQueryDto } from './dto/task-query.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { Task } from './entities/task.entity';
+import { ExtendBodyWithUserId } from './extend-body-with-user.interceptor';
 import { TaskService } from './task.service';
 
 @Controller('tasks')
 @ApiTags('Tasks')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
+  @UseInterceptors(ExtendBodyWithUserId)
   @HttpCode(HttpStatus.CREATED)
   public async create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     return this.taskService.create(createTaskDto);
@@ -20,11 +40,13 @@ export class TaskController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  public async find(@Query() query: TaskQueryDto): Promise<IPaginationResult<Task>> {
-    const { page, limit, title, status } = query;
-    // TODO: change title with ilike
-    // TODO: add order by field to query
-    return infinityPagination(await this.taskService.findManyWithPagination({ title, status }, { page, limit }), { page, limit });
+  public async find(@Query() query: TaskQueryDto, @AuthUser() user: User): Promise<IPaginationResult<Task>> {
+    const { page, limit, title, status, search, orderBy } = query;
+    const findOptions = { title, status, search, orderBy, userId: user.id };
+    return infinityPagination(await this.taskService.findManyWithPagination(findOptions, { page, limit }), {
+      page,
+      limit,
+    });
   }
 
   @Get(':id')
