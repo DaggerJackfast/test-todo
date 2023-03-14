@@ -1,4 +1,4 @@
-import { Between, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { Between, MoreThanOrEqual, LessThanOrEqual, ILike } from 'typeorm';
 
 export const buildFilterByDate =
   (options, field) =>
@@ -43,6 +43,36 @@ export const buildFilterByFieldName =
       return {
         ...filter,
         [field]: options[optionKey],
+      };
+    }
+    return filter;
+  };
+
+export const buildILikeFilterByFieldName =
+  (options, optionKey, field) =>
+  (filter): object => {
+    if (options[optionKey]) {
+      return {
+        ...filter,
+        [field]: ILike(`%${options[optionKey]}%`),
+      };
+    }
+    return filter;
+  };
+
+export const buildOrderByFieldName =
+  (options, optionKey) =>
+  (filter): object => {
+    if (options[optionKey]) {
+      let field = options[optionKey];
+      let orderType = 'ASC';
+      if (field.startsWith('-')) {
+        field = field.split('-').pop();
+        orderType = 'DESC';
+      }
+      return {
+        ...filter,
+        [field]: orderType,
       };
     }
     return filter;
