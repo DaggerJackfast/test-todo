@@ -1,19 +1,9 @@
+import map from 'lodash/map';
 interface ToNumberOptions {
   default?: number;
   min?: number;
   max?: number;
 }
-
-export const toLowerCase = (value: string): string => value.toLowerCase();
-
-export const trim = (value: string): string => value.trim();
-
-export const toDate = (value: string): Date => new Date(value);
-
-export const toBoolean = (value: string): boolean => {
-  value = value.toLowerCase();
-  return value === 'true' || value === '1' ? true : false;
-};
 
 export const toNumber = (value: string, opts: ToNumberOptions = {}): number => {
   let newValue: number = Number.parseInt(value || String(opts.default), 10);
@@ -33,4 +23,8 @@ export const toNumber = (value: string, opts: ToNumberOptions = {}): number => {
   }
 
   return newValue;
+};
+
+export const objectToArray = (object: object): unknown => {
+  return map(object, (value, key) => ({ [key]: value }));
 };
