@@ -1,6 +1,6 @@
 ## Description
 
-Test todo app for nambaone. Task definition you can see in [./definition.md](./definition.md) file.
+Test todo app for namba one. Task definition you can see in [./definition.md](./definition.md) file.
 
 ## Run in docker guide
 
