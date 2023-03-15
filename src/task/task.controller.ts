@@ -13,9 +13,18 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiResponse,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { AuthUser } from '../auth/auth.decorator';
-import { infinityPagination, IPaginationResult } from '../lib/pagination';
+import { MePayloadDto } from '../auth/dto/me-payload.dto';
+import { infinityPagination, PaginationResultDto } from '../lib/pagination';
 import { User } from '../user/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskQueryDto } from './dto/task-query.dto';
@@ -34,13 +43,32 @@ export class TaskController {
   @Post()
   @UseInterceptors(ExtendBodyWithUserId)
   @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: Task })
   public async create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     return this.taskService.create(createTaskDto);
   }
 
   @Get()
+  // TODO: fix array
+  @ApiExtraModels(PaginationResultDto, Task)
+  @ApiOkResponse({
+    description: 'Tasks pagination result',
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(PaginationResultDto) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(Task) },
+            },
+          },
+        },
+      ],
+    },
+  })
   @HttpCode(HttpStatus.OK)
-  public async find(@Query() query: TaskQueryDto, @AuthUser() user: User): Promise<IPaginationResult<Task>> {
+  public async find(@Query() query: TaskQueryDto, @AuthUser() user: User): Promise<PaginationResultDto<Task>> {
     const { page, limit, title, status, search, orderBy } = query;
     const findOptions = { title, status, search, orderBy, userId: user.id };
     return infinityPagination(await this.taskService.findManyWithPagination(findOptions, { page, limit }), {
@@ -51,12 +79,15 @@ export class TaskController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: Task })
+  @ApiExtraModels(Task)
   public async findOne(@Param('id') id: string): Promise<Task> {
     return this.taskService.findOne(id);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: Task })
   public async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto): Promise<Task> {
     return this.taskService.update(id, updateTaskDto);
   }
