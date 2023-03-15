@@ -6,13 +6,12 @@ services:
       dockerfile: Dockerfile
       context: .
     container_name: backend
-    image: ${IMAGE}
     volumes:
       - ./logs:/app/logs
     depends_on:
       - postgres_db
     env_file:
-      - .env.production # TODO: change to env
+      - .env.production
     ports:
       - "5000:5000"
 
@@ -21,7 +20,7 @@ services:
     image: postgres:14.1-alpine
     container_name: postgres_db
     env_file:
-      - .env.database # TODO: change to env
+      - .env.database
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
