@@ -62,12 +62,11 @@ export class TaskService {
   }
 
   public async update(id: string, updateTaskDto: UpdateTaskDto): Promise<Task> {
-    return this.taskRepository.save(
-      this.taskRepository.create({
-        id,
-        ...updateTaskDto,
-      }),
-    );
+    const entity = this.taskRepository.create({
+      id,
+      ...updateTaskDto,
+    });
+    return this.taskRepository.save(entity);
   }
 
   public async remove(id: string): Promise<void> {

@@ -49,7 +49,6 @@ export class TaskController {
   }
 
   @Get()
-  // TODO: fix array
   @ApiExtraModels(PaginationResultDto, Task)
   @ApiOkResponse({
     description: 'Tasks pagination result',
@@ -88,6 +87,7 @@ export class TaskController {
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Task })
+  @UseInterceptors(ExtendBodyWithUserId)
   public async update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto): Promise<Task> {
     return this.taskService.update(id, updateTaskDto);
   }

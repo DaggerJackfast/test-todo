@@ -6,6 +6,6 @@ import { CreateTaskDto } from './create-task.dto';
 export class UpdateTaskDto extends PartialType(CreateTaskDto) {
   @ApiProperty({ enum: TaskStatus, isArray: false, example: TaskStatus.IN_WORKING })
   @IsOptional()
-  // @IsEnum(TaskStatus)
+  @IsEnum(TaskStatus)
   status?: string;
 }
